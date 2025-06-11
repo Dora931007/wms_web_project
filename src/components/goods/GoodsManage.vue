@@ -226,7 +226,9 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="inDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="doInGoods" :disabled="!formValid">确 定</el-button>
+        <el-button type="primary" @click="doGoods" :disabled="!formValid"
+          >确 定</el-button
+        >
       </span>
     </el-dialog>
   </div>
@@ -286,14 +288,18 @@ export default {
 
       rules1: {
         count: [
-          { required: true, message: "请输入出库数量", trigger: "blur" },
+          { required: true, message: "请输入数量", trigger: "blur" },
           {
             validator: (rule, value, callback) => {
               if (!value) {
-                callback(new Error("请输入出库数量"));
+                callback(new Error("请输入数量"));
               } else if (!/^[1-9]\d*$/.test(value)) {
                 callback(new Error("请输入正整数"));
-              } else if (parseInt(value) > parseInt(this.currentRow.count)) {
+              } else if (
+                this.form1.action === "2" &&
+                parseInt(value) > parseInt(this.currentRow.count)
+              ) {
+                // 只有出库(action=2)时才检查库存
                 callback(
                   new Error(
                     `出库数量不能大于当前库存(${this.currentRow.count})`
@@ -305,9 +311,7 @@ export default {
             },
             trigger: "blur",
           },
-        
         ],
-       
       },
 
       rules: {
@@ -342,39 +346,41 @@ export default {
     selectCurrentChange(val) {
       this.currentRow = val;
     },
+    //
     outGoods() {
       if (!this.currentRow.id) {
         alert("请选择出库商品");
         return;
       }
 
-      // 确保库存数量足够
       if (this.currentRow.count <= 0) {
         alert("该商品库存不足，无法出库！");
         return;
       }
+
       this.inDialogVisible = true;
       this.$nextTick(() => {
         this.resetInForm();
-      });
+        this.form1.goodsname = this.currentRow.name;
+        this.form1.goods = this.currentRow.id;
+        this.form1.adminId = this.user.id;
+        this.form1.action = "2";
 
-        // 添加表单验证监听
-        this.$watch(
-            () => [this.form1.count, this.form1.userId], // 监听这些字段的变化
+        // 确保表单引用存在后再设置监听
+        if (this.$refs.form1) {
+          this.$watch(
+            () => [this.form1.count, this.form1.userId],
             () => {
-                this.$refs.form1.validate((valid) => {
-                    this.formValid = valid;
-                });
+              this.$refs.form1.validate((valid) => {
+                this.formValid = valid;
+              });
             },
-            { immediate: true } // 立即执行一次
-        ),
-      console.log("选择的name是" + this.currentRow.name);
-      this.form1.goodsname = this.currentRow.name;
-      console.log("选择的id是" + this.currentRow.id);
-      this.form1.goods = this.currentRow.id;
-      this.form1.adminId = this.user.id;
-      this.form1.action = "2";
+            { immediate: true }
+          );
+        }
+      });
     },
+
     inGoods() {
       if (!this.currentRow.id) {
         alert("请选择入库商品");
@@ -383,24 +389,24 @@ export default {
       this.inDialogVisible = true;
       this.$nextTick(() => {
         this.resetInForm();
-      });
+        this.form1.goodsname = this.currentRow.name;
+        this.form1.goods = this.currentRow.id;
+        this.form1.adminId = this.user.id;
+        this.form1.action = "1";
 
-       // 添加表单验证监听
-        this.$watch(
-            () => [this.form1.count, this.form1.userId], // 监听这些字段的变化
+        // 确保表单引用存在后再设置监听
+        if (this.$refs.form1) {
+          this.$watch(
+            () => [this.form1.count, this.form1.userId],
             () => {
-                this.$refs.form1.validate((valid) => {
-                    this.formValid = valid;
-                });
+              this.$refs.form1.validate((valid) => {
+                this.formValid = valid;
+              });
             },
-            { immediate: true } // 立即执行一次
-        ),
-      console.log("选择的name是" + this.currentRow.name);
-      this.form1.goodsname = this.currentRow.name;
-      console.log("选择的id是" + this.currentRow.id);
-      this.form1.goods = this.currentRow.id;
-      this.form1.adminId = this.user.id;
-      this.form1.action = "1";
+            { immediate: true }
+          );
+        }
+      });
     },
     formatStorage(row) {
       let temp = this.storageData.find((item) => {
@@ -523,7 +529,7 @@ export default {
         }
       });
     },
-    doInGoods() {
+    doGoods() {
       this.$axios
         .post(this.$httpUrl + "/record/save", this.form1)
         //.then((res) => res.data)
@@ -531,7 +537,7 @@ export default {
           console.log(res);
           if (res.status == 200) {
             this.$message({
-              message: "新增成功",
+              message: "操作成功",
               type: "success",
             });
             this.inDialogVisible = false;
@@ -539,7 +545,7 @@ export default {
             this.resetInForm();
           } else {
             this.$message({
-              message: "新增失败",
+              message: "操作失败",
               type: "error",
             });
           }
