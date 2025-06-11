@@ -87,10 +87,9 @@
       </el-table-column>
       <el-table-column prop="count" label="物品数量" width="180">
       </el-table-column>
-      <el-table-column prop="remark" label="备注" >
-      </el-table-column>
+      <el-table-column prop="remark" label="备注"> </el-table-column>
 
-      <el-table-column prop="operate" label="操作"  v-if="user.roleId!=2">
+      <el-table-column prop="operate" label="操作" v-if="user.roleId != 2">
         <template slot-scope="scope">
           <el-button size="small" type="success" @click="mod(scope.row)"
             >编辑</el-button
@@ -227,7 +226,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="inDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="doInGoods">确 定</el-button>
+        <el-button type="primary" @click="doInGoods" :disabled="!formValid">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -262,6 +261,7 @@ export default {
       inDialogVisible: false,
       innerVisible: false,
       currentRow: {},
+      formValid: false,
       tempUser: {},
 
       form1: {
@@ -284,7 +284,31 @@ export default {
         remark: "",
       },
 
-      rules1: {},
+      rules1: {
+        count: [
+          { required: true, message: "请输入出库数量", trigger: "blur" },
+          {
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback(new Error("请输入出库数量"));
+              } else if (!/^[1-9]\d*$/.test(value)) {
+                callback(new Error("请输入正整数"));
+              } else if (parseInt(value) > parseInt(this.currentRow.count)) {
+                callback(
+                  new Error(
+                    `出库数量不能大于当前库存(${this.currentRow.count})`
+                  )
+                );
+              } else {
+                callback();
+              }
+            },
+            trigger: "blur",
+          },
+        
+        ],
+       
+      },
 
       rules: {
         name: [{ required: true, message: "请输入物品名称", trigger: "blur" }],
@@ -320,13 +344,30 @@ export default {
     },
     outGoods() {
       if (!this.currentRow.id) {
-        alert("请选择出库");
+        alert("请选择出库商品");
+        return;
+      }
+
+      // 确保库存数量足够
+      if (this.currentRow.count <= 0) {
+        alert("该商品库存不足，无法出库！");
         return;
       }
       this.inDialogVisible = true;
       this.$nextTick(() => {
         this.resetInForm();
       });
+
+        // 添加表单验证监听
+        this.$watch(
+            () => [this.form1.count, this.form1.userId], // 监听这些字段的变化
+            () => {
+                this.$refs.form1.validate((valid) => {
+                    this.formValid = valid;
+                });
+            },
+            { immediate: true } // 立即执行一次
+        ),
       console.log("选择的name是" + this.currentRow.name);
       this.form1.goodsname = this.currentRow.name;
       console.log("选择的id是" + this.currentRow.id);
@@ -336,13 +377,24 @@ export default {
     },
     inGoods() {
       if (!this.currentRow.id) {
-        alert("请选择入库");
+        alert("请选择入库商品");
         return;
       }
       this.inDialogVisible = true;
       this.$nextTick(() => {
         this.resetInForm();
       });
+
+       // 添加表单验证监听
+        this.$watch(
+            () => [this.form1.count, this.form1.userId], // 监听这些字段的变化
+            () => {
+                this.$refs.form1.validate((valid) => {
+                    this.formValid = valid;
+                });
+            },
+            { immediate: true } // 立即执行一次
+        ),
       console.log("选择的name是" + this.currentRow.name);
       this.form1.goodsname = this.currentRow.name;
       console.log("选择的id是" + this.currentRow.id);

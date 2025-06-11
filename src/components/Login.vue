@@ -58,7 +58,7 @@
                                 //存储
                                 sessionStorage.setItem("CurUser",JSON.stringify(res.data.user))
                                 console.log(res.data.menu)
-                                this.$store.commit("setMenu",res.data.menu)
+                                this.$store.commit("setMenu",res.data)
                                 //跳转到主页
                                 this.$router.replace('/Index');
                             }else{
