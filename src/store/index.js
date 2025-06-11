@@ -4,30 +4,66 @@ import router,{resetRouter} from "../router";
 import  createPersistedState from 'vuex-persistedstate';
 vue.use(Vuex)
 
+// function addNewRoute(menuList) {
+//     console.log(menuList)
+//     let routes = router.options.routes
+//     console.log(routes)
+//     routes.forEach(routeItem=>{
+//         if(routeItem.path=="/Index"){
+//             menuList.forEach(menu=>{
+//                 //子路由
+//                 let childRoute =  {
+//                     path:'/'+menu.menuclick,
+//                     name:menu.menuname,
+//                     meta:{
+//                         title:menu.menuname
+//                     },
+//                     component:()=>import('../components/'+menu.menucomponent)
+//                 }
+
+//                 routeItem.children.push(childRoute)
+//             })
+//         }
+//     })
+
+//     resetRouter()
+//     router.addRoutes(routes)
+// }
+
 function addNewRoute(menuList) {
-    console.log(menuList)
-    let routes = router.options.routes
-    console.log(routes)
-    routes.forEach(routeItem=>{
-        if(routeItem.path=="/Index"){
-            menuList.forEach(menu=>{
-                //子路由
-                let childRoute =  {
-                    path:'/'+menu.menuclick,
-                    name:menu.menuname,
-                    meta:{
-                        title:menu.menuname
-                    },
-                    component:()=>import('../components/'+menu.menucomponent)
+    // 确保 menuList 是数组
+    if (!Array.isArray(menuList)) {
+        console.error('menuList 不是数组:', menuList);
+        return;
+    }
+    
+    console.log('菜单列表:', menuList);
+    let routes = router.options.routes;
+    
+    routes.forEach(routeItem => {
+        if(routeItem.path == "/Index") {
+            menuList.forEach(menu => {
+                // 确保菜单项有必要的属性
+                if (!menu.menuclick || !menu.menuname || !menu.menucomponent) {
+                    console.error('菜单项缺少必要属性:', menu);
+                    return;
                 }
-
-                routeItem.children.push(childRoute)
-            })
+                
+                let childRoute = {
+                    path: '/' + menu.menuclick,
+                    name: menu.menuname,
+                    meta: {
+                        title: menu.menuname
+                    },
+                    component: () => import('../components/' + menu.menucomponent)
+                };
+                routeItem.children.push(childRoute);
+            });
         }
-    })
-
-    resetRouter()
-    router.addRoutes(routes)
+    });
+    
+    resetRouter();
+    router.addRoutes(routes);
 }
 
 export default new Vuex.Store({
@@ -47,3 +83,4 @@ export default new Vuex.Store({
     },
     plugins:[createPersistedState()]
 })
+
