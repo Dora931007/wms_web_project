@@ -77,6 +77,7 @@
 </template>
 
 <script>
+
 export default {
   name: "RecordManage",
   data() {
@@ -103,6 +104,7 @@ export default {
     };
   },
   methods: {
+    
     formatStorage(row) {
       let temp = this.storageData.find((item) => {
         return item.id == row.storage;
