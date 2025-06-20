@@ -48,6 +48,8 @@
     </el-descriptions>
     <DateUtils></DateUtils> -->
     <!-- 添加可视化组件     -->
+
+
     <goods-visualization
       :storage-data="storageData"
       :goodstype-data="goodstypeData"
@@ -71,6 +73,10 @@ export default {
   },
   computed: {},
   methods: {
+    handleRefreshCharts() {
+      // 调用 GoodsVisualization 的刷新方法
+      this.$refs.goodsVisualization.loadStatistics();
+    },
     init() {
       this.user = JSON.parse(sessionStorage.getItem("CurUser"));
       this.loadStorage();

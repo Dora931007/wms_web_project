@@ -451,6 +451,7 @@ export default {
       this.inDialogVisible = true;
       this.$nextTick(() => {
         this.resetInForm();
+        this.$emit('refresh-charts');
         this.form1.goodsname = this.currentRow.name;
         this.form1.goods = this.currentRow.id;
         this.form1.adminId = this.user.id;
@@ -479,6 +480,7 @@ export default {
       this.inDialogVisible = true;
       this.$nextTick(() => {
         this.resetInForm();
+        this.$emit('refresh-charts');
         this.form1.goodsname = this.currentRow.name;
         this.form1.goods = this.currentRow.id;
         this.form1.adminId = this.user.id;
@@ -633,6 +635,8 @@ export default {
             this.inDialogVisible = false;
             this.loadPost();
             this.resetInForm();
+            // 新增：触发父组件的刷新事件
+          
           } else {
             this.$message({
               message: "操作失败",
