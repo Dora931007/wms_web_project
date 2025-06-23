@@ -38,7 +38,7 @@
       :header-cell-style="{ background: '#f2f5fc', color: '#555555' }"
       border
     >
-      <el-table-column prop="id" label="ID" width="60"> </el-table-column>
+      <el-table-column label="序号" width="60" type="index" :index="indexMethod"></el-table-column>
       <el-table-column prop="name" label="仓库名" width="180"> </el-table-column>
       <el-table-column prop="remark" label="备注" width="350"> </el-table-column>
       
@@ -123,6 +123,9 @@ export default {
     };
   },
   methods: {
+    indexMethod(index) {
+      return (this.pageNum - 1) * this.pageSize + index + 1;
+    },
     beforeImportUpload(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();

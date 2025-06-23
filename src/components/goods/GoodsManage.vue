@@ -83,7 +83,7 @@
       highlight-current-row
       @current-change="selectCurrentChange"
     >
-      <el-table-column prop="id" label="ID" width="60"> </el-table-column>
+      <el-table-column label="序号" width="60" type="index" :index="indexMethod"></el-table-column>
       <el-table-column prop="name" label="物品名称" width="180">
       </el-table-column>
       <el-table-column
@@ -100,7 +100,7 @@
         :formatter="formatGoodsType"
       >
       </el-table-column>
-      <el-table-column prop="count" label="物品数量" width="180">
+      <el-table-column prop="count" label="物品数量" width="130">
       </el-table-column>
       <el-table-column prop="remark" label="备注"> </el-table-column>
 
@@ -349,6 +349,9 @@ export default {
     };
   },
   methods: {
+    indexMethod(index) {
+      return (this.pageNum - 1) * this.pageSize + index + 1;
+    },
     beforeImportUpload(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -673,6 +676,7 @@ export default {
           if (res.code == 200) {
             this.tableData = res.data;
             this.total = res.total;
+            
           } else {
             alert("获取数据失败");
           }

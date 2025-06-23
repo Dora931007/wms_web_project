@@ -36,7 +36,7 @@
       :header-cell-style="{ background: '#f2f5fc', color: '#555555' }"
       border
     >
-      <el-table-column prop="id" label="ID" width="60"> </el-table-column>
+      <el-table-column label="序号" width="60" type="index" :index="indexMethod"></el-table-column>
       <el-table-column prop="no" label="账号" width="180"> </el-table-column>
       <el-table-column prop="name" label="姓名" width="180"> </el-table-column>
       <el-table-column prop="age" label="年龄" width="80"> </el-table-column>
@@ -237,6 +237,9 @@ export default {
     };
   },
   methods: {
+    indexMethod(index) {
+      return (this.pageNum - 1) * this.pageSize + index + 1;
+    },
     resetForm() {
       this.$refs.form.resetFields();
     },

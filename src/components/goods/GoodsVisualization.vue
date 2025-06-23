@@ -3,10 +3,7 @@
     class="dashboard-container"
     style="height: calc(100vh - 60px); overflow: hidden"
   >
-    <el-row
-      :gutter="15"
-      style="margin-top: 15px"
-    >
+    <el-row :gutter="15" style="margin-top: 15px">
       <el-col :span="12">
         <el-card>
           <div slot="header">库存分布(按仓库)</div>
@@ -22,7 +19,7 @@
     </el-row>
     <el-row :gutter="15" style="margin-top: 15px">
       <el-col :span="8">
-        <el-card style="height: 100%">
+        <el-card>
           <div slot="header">库存概况</div>
           <div class="stat-card" style="height: 200px">
             <div class="stat-item" style="flex: 1; min-width: 100px">
@@ -41,7 +38,7 @@
         </el-card>
       </el-col>
       <el-col :span="16">
-        <el-card style="height: 100%">
+        <el-card>
           <div slot="header">库存分布(按物品)</div>
           <div id="goodsChart" style="height: 219px"></div>
         </el-card>
@@ -282,8 +279,6 @@ export default {
         return;
       }
 
-      // 确保goodsStats存在，如果不存在则初始化为空数组
-      //const goodsStats = this.statData.goodsStats || [];
       // 仓库分布饼图
       this.storageChart = echarts.init(document.getElementById("storageChart"));
       this.storageChart.setOption({
@@ -339,54 +334,61 @@ export default {
         ],
       });
 
-      // 分类分布柱状图
-      this.typeChart = echarts.init(document.getElementById("typeChart"));
-      this.typeChart.setOption({
-        grid: {
-          top: 30,
-          bottom: 20,
-          left: 50,
-          right: 20,
+
+this.typeChart = echarts.init(document.getElementById("typeChart"));
+// 对分类数据进行排序（按库存量降序）
+const sortedTypeStats = [...(this.statData.typeStats || [])]
+  .sort((a, b) => b.total - a.total)
+  .map((item) => ({
+    ...item,
+    name: this.goodstypeData.find((t) => t.id == item.goodstype)?.name || "未知分类"
+  }));
+console.log("排序后的分类数据:", sortedTypeStats);
+
+this.typeChart.setOption({
+  grid: {
+    top: 30,
+    bottom: 20,
+    left: 50,
+    right: 20,
+  },
+  tooltip: {
+    trigger: "axis",
+    axisPointer: {
+      type: "shadow",
+    },
+  },
+  xAxis: {
+    type: "category",
+    data: sortedTypeStats.map((item) => item.name),
+    axisLabel: {
+      interval: 0 // 确保所有标签都显示
+    }
+  },
+  yAxis: {
+    type: "value",
+  },
+  series: [
+    {
+      name: "库存数量",
+      type: "bar",
+      data: sortedTypeStats.map((item) => item.total),
+      barWidth: "50%",
+      itemStyle: {
+        color: function (params) {
+          const colorList = [
+            "#c23531",
+            "#2f4554",
+            "#61a0a8",
+            "#d48265",
+            "#91c7ae",
+          ];
+          return colorList[params.dataIndex % colorList.length];
         },
-        tooltip: {
-          trigger: "axis",
-          axisPointer: {
-            type: "shadow",
-          },
-        },
-        xAxis: {
-          type: "category",
-          data: this.statData.typeStats.map((item) => {
-            return (
-              this.goodstypeData.find((t) => t.id == item.goodstype)?.name ||
-              "未知分类"
-            );
-          }),
-        },
-        yAxis: {
-          type: "value",
-        },
-        series: [
-          {
-            name: "库存数量",
-            type: "bar",
-            data: this.statData.typeStats.map((item) => item.total),
-            barWidth: "50%",
-            itemStyle: {
-              color: function (params) {
-                const colorList = [
-                  "#c23531",
-                  "#2f4554",
-                  "#61a0a8",
-                  "#d48265",
-                  "#91c7ae",
-                ];
-                return colorList[params.dataIndex % colorList.length];
-              },
-            },
-          },
-        ],
-      });
+      },
+    },
+  ],
+});
 
       // 物品分布柱状图
       this.goodsChart = echarts.init(document.getElementById("goodsChart"));
@@ -397,6 +399,8 @@ export default {
           ...item,
           name: item.name || "未知物品", // 直接使用接口返回的name字段
         }));
+      console.log("原始数据:", this.statData);
+      console.log("goodsStats:", this.statData.goodsStats);
       console.log("排序后的商品数据:", sortedGoodsStats);
       // 限制显示前10个商品
       const topGoodsStats = sortedGoodsStats.slice(0, 10);
@@ -418,6 +422,9 @@ export default {
         xAxis: {
           type: "category",
           data: topGoodsStats.map((item) => item.name),
+          axisLabel: {
+            interval: 0, // 强制显示所有标签
+          },
         },
         yAxis: {
           type: "value",
@@ -448,7 +455,7 @@ export default {
     handleResize() {
       if (this.storageChart) this.storageChart.resize();
       if (this.typeChart) this.typeChart.resize();
-      if (this.goodsDistributionChart) this.goodsDistributionChart.resize();
+      if (this.goodsChart) this.goodsChart.resize();
     },
   },
   mounted() {
@@ -464,17 +471,12 @@ export default {
     window.removeEventListener("resize", this.handleResize);
     if (this.storageChart) this.storageChart.dispose();
     if (this.typeChart) this.typeChart.dispose();
-    if (this.goodsDistributionChart) this.goodsDistributionChart.dispose();
+    if (this.goodsChart) this.goodsChart.dispose();
   },
 };
 </script>
 
 <style scoped>
-/* 添加一些特定样式 */
-#goodsDistributionChart {
-  width: 100%;
-  min-height: 300px;
-}
 .stat-card {
   height: 100%;
   display: flex;
@@ -483,8 +485,6 @@ export default {
   padding: 10px 0;
   flex-direction: column;
 }
-
-
 
 .stat-item {
   padding: 5px 10px;
@@ -516,7 +516,7 @@ export default {
 }
 
 .el-card__body {
-  height: calc(100% - 57px); 
+  height: calc(100% - 57px);
   padding: 15px;
 }
 </style>

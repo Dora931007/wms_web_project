@@ -39,13 +39,26 @@
         >查询</el-button
       >
       <el-button type="success" @click="resetParam">重置</el-button>
+
+      <el-button
+        type="primary"
+        style="display: inline-block; margin-left: 10px"
+        @click="exportData"
+        >导出</el-button
+      >
     </div>
+
     <el-table
       :data="tableData"
       :header-cell-style="{ background: '#f2f5fc', color: '#555555' }"
       border
     >
-      <el-table-column prop="id" label="ID" width="60"> </el-table-column>
+      <el-table-column
+        label="序号"
+        width="60"
+        type="index"
+        :index="indexMethod"
+      ></el-table-column>
       <el-table-column prop="goodsname" label="物品名称" width="120">
       </el-table-column>
       <el-table-column prop="storagename" label="所属仓库" width="120">
@@ -77,7 +90,8 @@
 </template>
 
 <script>
-
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 export default {
   name: "RecordManage",
   data() {
@@ -104,7 +118,63 @@ export default {
     };
   },
   methods: {
-    
+    indexMethod(index) {
+      return (this.pageNum - 1) * this.pageSize + index + 1;
+    },
+    exportData() {
+      this.$axios
+        .post(this.$httpUrl + "/record/listPage", {
+          pageSize: 10000,
+          pageNum: 1,
+          param: {
+            name: this.name,
+            goodstype: this.goodstype + "",
+            storage: this.storage + "",
+            roleId: this.user.roleId + "",
+            userId: this.user.id + "",
+          },
+        })
+        .then((res) => res.data)
+        .then((res) => {
+          if (res.code == 200) {
+            // 准备导出数据，添加序号字段
+            const exportData = res.data.map((item, index) => ({
+              序号: index + 1, // 添加前端连续序号
+              物品名称: item.goodsname,
+              所属仓库: item.storagename,
+              所属分类: item.goodstype,
+              操作人: item.adminname,
+              申请人: item.username,
+              物品数量: item.count,
+              操作时间: item.createtime,
+              备注: item.remark,
+            }));
+
+            // 创建工作表和簿
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "出入库记录");
+
+            // 生成Excel文件
+            const excelBuffer = XLSX.write(wb, {
+              bookType: "xlsx",
+              type: "array",
+            });
+
+            // 创建并保存
+            const blob = new Blob([excelBuffer], {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+            saveAs(blob, "出入库记录.xlsx");
+          } else {
+            this.$message.error("导出数据失败");
+          }
+        })
+        .catch((error) => {
+          console.error("导出出错:", error);
+          this.$message.error("导出过程中发生错误");
+        });
+    },
     formatStorage(row) {
       let temp = this.storageData.find((item) => {
         return item.id == row.storage;
@@ -179,7 +249,7 @@ export default {
         .get(this.$httpUrl + "/goodstype/list")
         .then((res) => res.data)
         .then((res) => {
-          console.log("分类为"+res);
+          console.log("分类为" + res);
           if (res.code == 200) {
             this.goodstypeData = res.data;
           } else {
@@ -192,7 +262,6 @@ export default {
     this.loadPost();
     this.loadStorage();
     this.loadGoodsType();
-
   },
 };
 </script>
