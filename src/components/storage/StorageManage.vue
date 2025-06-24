@@ -3,7 +3,7 @@
     <div style="margin-bottom: 5px">
       <el-input
         v-model="name"
-        placeholder="请输入仓库名"
+        placeholder="请输入仓库名称"
         suffix-icon="el-icon-search"
         style="width: 200px"
         @keyup.enter.native="loadPost"
@@ -39,7 +39,7 @@
       border
     >
       <el-table-column label="序号" width="60" type="index" :index="indexMethod"></el-table-column>
-      <el-table-column prop="name" label="仓库名" width="180"> </el-table-column>
+      <el-table-column prop="name" label="仓库名称" width="180"> </el-table-column>
       <el-table-column prop="remark" label="备注" width="350"> </el-table-column>
       
       <el-table-column prop="operate" label="操作">
@@ -71,13 +71,13 @@
     </el-pagination>
 
     <el-dialog
-      title="新增"
+      :title="isNewRecord ? '新增' : '编辑'"
       :visible.sync="centerDialogVisible"
       width="30%"
       center
     >
       <el-form ref="form" :rules="rules" :model="form" label-width="80px">
-        <el-form-item label="仓库名" prop="name">
+        <el-form-item label="仓库名称" prop="name">
           <el-col :span="20">
             <el-input v-model="form.name"></el-input>
           </el-col>
@@ -118,7 +118,7 @@ export default {
 
       },
       rules: { 
-        name: [{ required: true, message: "请输入仓库名", trigger: "blur" }],
+        name: [{ required: true, message: "请输入仓库名称", trigger: "blur" }],
       },
     };
   },
@@ -137,7 +137,7 @@ export default {
             const jsonData = XLSX.utils.sheet_to_json(sheet);
             
             // 验证表头
-            const requiredHeaders = ['仓库名称'];
+            const requiredHeaders = ['仓库名称称'];
             const headers = Object.keys(jsonData[0] || {});
             
             const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
@@ -149,7 +149,7 @@ export default {
             // 验证数据
             const errors = [];
             jsonData.forEach((row, index) => {
-              if (!row['仓库名称']) {
+              if (!row['仓库名称称']) {
                 errors.push(`第${index + 2}行数据不完整`);
               }
             });
@@ -235,6 +235,7 @@ export default {
       });
     },
     add() {
+      this.isNewRecord = true;
       this.centerDialogVisible = true;
       this.$nextTick(() => {
         this.resetForm();

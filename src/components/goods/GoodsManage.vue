@@ -133,7 +133,7 @@
     </el-pagination>
 
     <el-dialog
-      title="物品维护"
+      :title="isNewRecord ? '新增' : '编辑'"
       :visible.sync="centerDialogVisible"
       width="30%"
       center
@@ -196,7 +196,7 @@
     </el-dialog>
 
     <el-dialog
-      title="出入库"
+      :title="operationType === 'in' ? '入库' : '出库'"
       :visible.sync="inDialogVisible"
       width="30%"
       center
@@ -242,7 +242,7 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="inDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="doGoods" :disabled="!formValid"
-          >确 定</el-button
+          >{{ operationType === 'in' ? '确认入库' : '确认出库' }} </el-button
         >
       </span>
     </el-dialog>
@@ -279,6 +279,7 @@ export default {
       centerDialogVisible: false,
       inDialogVisible: false,
       innerVisible: false,
+      operationType: 'in', // 'in'表示入库，'out'表示出库
       currentRow: {},
       formValid: false,
       tempUser: {},
@@ -450,7 +451,7 @@ export default {
         alert("该商品库存不足，无法出库！");
         return;
       }
-
+      this.operationType = 'out';
       this.inDialogVisible = true;
       this.$nextTick(() => {
         this.resetInForm();
@@ -480,6 +481,7 @@ export default {
         alert("请选择入库商品");
         return;
       }
+      this.operationType = 'in';
       this.inDialogVisible = true;
       this.$nextTick(() => {
         this.resetInForm();
@@ -561,6 +563,7 @@ export default {
       });
     },
     add() {
+      this.isNewRecord = true ;
       this.centerDialogVisible = true;
       this.$nextTick(() => {
         this.resetForm();

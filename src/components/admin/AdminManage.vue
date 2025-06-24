@@ -3,7 +3,7 @@
     <div style="margin-bottom: 5px">
       <el-input
         v-model="name"
-        placeholder="请输入姓名"
+        placeholder="请输入管理员姓名"
         suffix-icon="el-icon-search"
         style="width: 200px"
         @keyup.enter.native="loadPost"
@@ -38,8 +38,8 @@
     >
     <el-table-column label="序号" width="60" type="index" :index="indexMethod"></el-table-column>
       <!-- <el-table-column prop="id" label="ID" width="60"> </el-table-column> -->
-      <el-table-column prop="no" label="账号" width="180"> </el-table-column>
-      <el-table-column prop="name" label="姓名" width="180"> </el-table-column>
+      <el-table-column prop="no" label="管理员账号" width="180"> </el-table-column>
+      <el-table-column prop="name" label="管理员姓名" width="180"> </el-table-column>
       <el-table-column prop="age" label="年龄" width="80"> </el-table-column>
       <el-table-column prop="sex" label="性别" width="80">
         <template slot-scope="scope">
@@ -101,19 +101,19 @@
     </el-pagination>
 
     <el-dialog
-      title="新增"
+      :title="isNewRecord ? '新增' : '编辑'"
       :visible.sync="centerDialogVisible"
       width="30%"
       center
     >
-      <el-form ref="form" :rules="rules" :model="form" label-width="80px">
-        <el-form-item label="账号" prop="no">
+      <el-form ref="form" :rules="rules" :model="form" label-width="100px">
+        <el-form-item label="管理员账号" prop="no">
           <el-col :span="20">
             <el-input v-model="form.no" :disabled="!isNewRecord"></el-input>
             
           </el-col>
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="管理员姓名" prop="name">
           <el-col :span="20">
             <el-input v-model="form.name"></el-input>
           </el-col>
@@ -171,7 +171,7 @@ export default {
           if (res.code !== 200) {
             callback();
           } else {
-            callback(new Error("账号已经存在"));
+            callback(new Error("管理员账号已经存在"));
           }
         });
     };
@@ -207,11 +207,11 @@ export default {
       },
       rules: {
         no: [
-          { required: true, message: "请输入账号", trigger: "blur" },
+          { required: true, message: "请输入管理员账号", trigger: "blur" },
           { min: 3, max: 8, message: "长度在 3 到 8 个字符", trigger: "blur" },
           { validator: checkDuplicate, trigger: "blur" },
         ],
-        name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
+        name: [{ required: true, message: "请输入管理员姓名", trigger: "blur" }],
         password: [
           { required: true, message: "请输入密码", trigger: "blur" },
           { min: 3, max: 8, message: "长度在 3 到 8 个字符", trigger: "blur" },
@@ -282,6 +282,7 @@ export default {
       });
     },
     add() {
+      this.isNewRecord = true;
       this.centerDialogVisible = true;
       this.$nextTick(() => {
         this.resetForm();

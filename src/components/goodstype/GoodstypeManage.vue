@@ -71,12 +71,12 @@
     </el-pagination>
 
     <el-dialog
-      title="新增"
+      :title="isNewRecord ? '新增' : '编辑'"
       :visible.sync="centerDialogVisible"
       width="30%"
       center
     >
-      <el-form ref="form" :rules="rules" :model="form" label-width="80px">
+      <el-form ref="form" :rules="rules" :model="form" label-width="120px">
         <el-form-item label="物品分类名称" prop="name">
           <el-col :span="20">
             <el-input v-model="form.name"></el-input>
@@ -235,6 +235,7 @@ export default {
       });
     },
     add() {
+      this.isNewRecord = true;
       this.centerDialogVisible = true;
       this.$nextTick(() => {
         this.resetForm();
