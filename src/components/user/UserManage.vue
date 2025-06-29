@@ -354,21 +354,13 @@ export default {
       this.pageNum = val;
       this.loadPost();
     },
-    loadGet() {
-      this.$axios
-        .get(this.$httpUrl + "/user/list")
-        .then((res) => res.data)
-        .then((res) => {
-          console.log(res);
-        });
-    },
     resetParam() {
       this.name = "";
       this.sex = "";
     },
     loadPost() {
       this.$axios
-        .post(this.$httpUrl + "/user/listPageC1", {
+        .post(this.$httpUrl + "/user/listUserPage", {
           pageSize: this.pageSize,
           pageNum: this.pageNum,
           param: {

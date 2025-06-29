@@ -24,24 +24,10 @@
 </template>
 
 <script>
-// import { computed } from 'vue';
 export default {
   name: "AsidePage",
   data(){
     return{
-      //isCollapse: false,
-      /*menu:[
-        {
-          menuClick: 'Admin',
-          menuName:'管理员管理',
-          menuIcon:'el-icon-s-custom'
-        },
-        {
-          menuClick: 'User',
-          menuName:'用户管理',
-          menuIcon:'el-icon-user-solid'
-        },
-      ]*/
     }
   },
   computed:{

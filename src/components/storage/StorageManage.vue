@@ -97,8 +97,8 @@
 </template>
 
 <script>
-import { saveAs } from "file-saver";
-import * as XLSX from 'xlsx'; 
+import { saveAs } from "file-saver";//处理 Excel文件解析和生成
+import * as XLSX from 'xlsx';  //实现文件下载功能
 export default {
   name: "StorageManage",
   data() {
@@ -126,30 +126,34 @@ export default {
     indexMethod(index) {
       return (this.pageNum - 1) * this.pageSize + index + 1;
     },
+
+    
+    //在文件上传前进行预处理和验证 读取上传的Excel文件 
     beforeImportUpload(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
+            //将文件内容转换为 Uint8Array 二进制数据
             const data = new Uint8Array(e.target.result);
+            // 使用XLSX (SheetJS库) 解析 Excel文件提取第一个工作表的数据并转换为 JSON 格式 进行数据验证：
             const workbook = XLSX.read(data, { type: 'array' });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(sheet);
             
-            // 验证表头
-            const requiredHeaders = ['仓库名称称'];
+            // 验证表头是否包含必填字段（如仓库名称）
+            const requiredHeaders = ['仓库名称'];
             const headers = Object.keys(jsonData[0] || {});
-            
             const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
             if (missingHeaders.length > 0) {
               this.$message.error(`缺少必要列: ${missingHeaders.join(', ')}`);
               return reject(false);
             }
             
-            // 验证数据
+            // 验证数据是否完整
             const errors = [];
             jsonData.forEach((row, index) => {
-              if (!row['仓库名称称']) {
+              if (!row['仓库名称']) {
                 errors.push(`第${index + 2}行数据不完整`);
               }
             });
@@ -159,36 +163,40 @@ export default {
               console.error('导入数据错误:', errors);
               return reject(false);
             }
-            
-            resolve(true);
+            resolve(true); //如果验证通过，返回resolve(true)；
           } catch (error) {
             this.$message.error('文件解析失败: ' + error.message);
-            reject(false);
+            reject(false);//否则返回 reject(false) 并显示错误信息
           }
         };
         reader.readAsArrayBuffer(file);
       });
     },
+    //处理导入成功后的回调函数。
     handleImportSuccess(response) {
-      if (response.code === 200) {
+      if (response.code === 200) { //如果服务器返回的response.code是200，显示"导入成功"并加载数据
         this.$message.success( '导入成功');
         this.loadPost();
       } else {
-        this.$message.error(response.msg || '导入失败');
+        this.$message.error(response.msg || '导入失败');//否则显示服务器返回的错误信息或默认提示"导入失败"
       }
     },
     
+    //处理导入失败时的错误回调，显示错误信息。
     handleImportError(error) {
       this.$message.error('导入失败: ' + (error.message || '未知错误'));
     },
+
+    //导出
     exportStorage(){
       this.$axios({
         url: this.$httpUrl + "/storage/export",
         method: "get",
-        responseType: "blob",
+        responseType: "blob",//设置 responseType: "blob" 接收二进制数据
       })
         .then((response) => {
-          saveAs(new Blob([response.data]), "仓库信息.xlsx");
+          //使用 saveAs (FileSaver.js 库) 将返回的 Blob 数据保存为 "仓库信息.xlsx" 文件
+          saveAs(new Blob([response.data]), "仓库信息.xlsx"); 
           this.$message.success("导出成功");
         })
         .catch((error) => {

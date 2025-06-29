@@ -37,7 +37,6 @@
       border
     >
     <el-table-column label="序号" width="60" type="index" :index="indexMethod"></el-table-column>
-      <!-- <el-table-column prop="id" label="ID" width="60"> </el-table-column> -->
       <el-table-column prop="no" label="管理员账号" width="180"> </el-table-column>
       <el-table-column prop="name" label="管理员姓名" width="180"> </el-table-column>
       <el-table-column prop="age" label="年龄" width="80"> </el-table-column>
@@ -182,7 +181,6 @@ export default {
       total: 0,
       name: "",
       sex: "",
-      isNewRecord: true,
       sexs: [
         {
           value: "1",
@@ -193,6 +191,7 @@ export default {
           label: "女",
         },
       ],
+      isNewRecord: true,
       centerDialogVisible: false,
 
       form: {
@@ -332,14 +331,14 @@ export default {
     },
     save() {
       this.$refs.form.validate((valid) => {
-        if (valid) {
+        if (valid) { //valid是true表示所有表单项都符合规则 再判断this.form.id是否存在：
           if (this.form.id) {
             this.doMod();
           } else {
             this.doSave();
           }
         } else {
-          console.log("error submit!!");
+          console.log("提交失败!!");
           return false;
         }
       });
@@ -355,21 +354,13 @@ export default {
       this.pageNum = val;
       this.loadPost();
     },
-    loadGet() {
-      this.$axios
-        .get(this.$httpUrl + "/user/list")
-        .then((res) => res.data)
-        .then((res) => {
-          console.log(res);
-        });
-    },
     resetParam() {
       this.name = "";
       this.sex = "";
     },
     loadPost() {
       this.$axios
-        .post(this.$httpUrl + "/user/listPageC1", {
+        .post(this.$httpUrl + "/user/listUserPage", {
           pageSize: this.pageSize,
           pageNum: this.pageNum,
           param: {
@@ -391,7 +382,6 @@ export default {
     },
   },
   beforeMount() {
-    //this.loadGet();
     this.loadPost();
   },
 };

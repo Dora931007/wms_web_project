@@ -175,6 +175,8 @@ export default {
           this.$message.error("导出过程中发生错误");
         });
     },
+
+   //从storageData数组中查找匹配ID的仓库 返回仓库名称
     formatStorage(row) {
       let temp = this.storageData.find((item) => {
         return item.id == row.storage;
@@ -182,12 +184,14 @@ export default {
 
       return temp && temp.name;
     },
+    
     formatGoodstype(row) {
       let temp = this.goodstypeData.find((item) => {
         return item.id == row.goodstype;
       });
       return temp && temp.name;
     },
+
     resetForm() {
       this.$refs.form.resetFields();
     },

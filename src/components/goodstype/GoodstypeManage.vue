@@ -126,6 +126,7 @@ export default {
     indexMethod(index) {
       return (this.pageNum - 1) * this.pageSize + index + 1;
     },
+    
     beforeImportUpload(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();

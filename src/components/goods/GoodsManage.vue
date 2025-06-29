@@ -50,14 +50,12 @@
         type="primary"
         style="margin-left: 10px"
         @click="inGoods"
-        v-if="user.roleId != 2"
         >入库</el-button
       >
       <el-button
         type="primary"
         style="margin-left: 10px"
         @click="outGoods"
-        v-if="user.roleId != 2"
         >出库</el-button
       >
       <el-upload
@@ -440,34 +438,36 @@ export default {
     selectCurrentChange(val) {
       this.currentRow = val;
     },
-    //
+    //出库
     outGoods() {
-      if (!this.currentRow.id) {
+      if (!this.currentRow.id) { //校验是否已选择商品
         alert("请选择出库商品");
         return;
       }
 
-      if (this.currentRow.count <= 0) {
+      if (this.currentRow.count <= 0) { //校验库存是否充足
         alert("该商品库存不足，无法出库！");
         return;
       }
-      this.operationType = 'out';
-      this.inDialogVisible = true;
+      this.operationType = 'out'; // 标记当前操作类型为"出库"
+      this.inDialogVisible = true;// 打开出库对话框
+
+      // 使用 $nextTick 确保在下次 DOM 更新循环之后执行回调
       this.$nextTick(() => {
         this.resetInForm();
-        this.$emit('refresh-charts');
+        this.$emit('refresh-charts'); //向父组件触发事件，通知刷新图表数据
         this.form1.goodsname = this.currentRow.name;
         this.form1.goods = this.currentRow.id;
         this.form1.adminId = this.user.id;
         this.form1.action = "2";
 
-        // 确保表单引用存在后再设置监听
+        //动态监听表单字段变化
         if (this.$refs.form1) {
           this.$watch(
-            () => [this.form1.count, this.form1.userId],
+            () => [this.form1.count, this.form1.userId],  // 监听数量和用户ID变化
             () => {
-              this.$refs.form1.validate((valid) => {
-                this.formValid = valid;
+              this.$refs.form1.validate((valid) => {// 触发表单校验
+                this.formValid = valid; // 更新校验状态
               });
             },
             { immediate: true }
@@ -476,14 +476,15 @@ export default {
       });
     },
 
+  //入库
     inGoods() {
-      if (!this.currentRow.id) {
+      if (!this.currentRow.id) { //校验是否已选择商品
         alert("请选择入库商品");
         return;
       }
       this.operationType = 'in';
       this.inDialogVisible = true;
-      this.$nextTick(() => {
+      this.$nextTick(() => {//确保DOM更新完成后再操作表单
         this.resetInForm();
         this.$emit('refresh-charts');
         this.form1.goodsname = this.currentRow.name;
